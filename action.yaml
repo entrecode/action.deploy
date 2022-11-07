@@ -1,30 +1,10 @@
 name: Deploy action
-description: ''
+description: 'deploy and commit changes'
 
 inputs:
-  apiversion: 
-    description: 'api-version'
-    required: false
-    default: ''
-  apigitsha: 
-    description: 'api-gitsha'
-    required: false
-    default: ''
-  workerversion:
-    description: 'worker-version'
-    required: false
-    default: ''
-  workergitsha:
-    description: 'worker-gitsha'
-    required: false
-    default: ''
-  nodeversion:
-    description: 'node-version'
-    required: false
-    default: ''
-  nodegitsha:
-    description: 'node-gitsha'
-    required: false
+  version: 
+    description: 'build.outputs.version'
+    required: true
     default: ''
   NAMESPACE:
     description: 'Namespace'
@@ -35,19 +15,7 @@ inputs:
     required: true
     default: ''
   env:
-    description: 'env'
-    required: true
-    default: ''
-  pushername:
-    description: 'pusher namen'
-    required: true
-    default: ''
-  pusheremail:
-    description: 'pusher email'
-    required: true
-    default: ''
-  deployversion:
-    description: 'deploy version'
+    description: 'build.outputs.env'
     required: true
     default: ''
 
@@ -55,24 +23,14 @@ runs:
   using: 'composite'
   steps:
   - name: run yq eval node
-    if: inputs.nodeversion != '' && inputs.nodegitsha != ''
-    run: yq eval -i '.node.version = "${{ inputs.nodeversion }}" | .node.gitsha = "${{ inputs.nodegitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
+    if: inputs.ifcheck == '1'
+    run: yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
     shell: bash
 
-  - name: run yq eval api
-    if: inputs.apiversion != '' && inputs.apigitsha != ''  
-    run: yq eval -i '.api.version = "${{ inputs.apiversion }}" | .api.gitsha = "${{ inputs.apigitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml     
-    shell: bash
-  
-  - name: run yq eval worker
-    if: inputs.workerversion != '' && inputs.workergitsha != ''
-    run: yq eval -i '.worker.version = "${{ inputs.workerversion }}" | .worker.gitsha = "${{ inputs.workergitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml
-    shell: bash
-  
   - name: Commit changes
     run: |
-      git config --global user.name ${{ inputs.pushername }}
-      git config --global user.email ${{ inputs.pusheremail }}
-      git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.deployversion }}"
+      git config --global user.name ${{ github.event.pusher.name }}
+      git config --global user.email ${{ github.event.pusher.email }}
+      git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.version }}"
       git push
     shell: bash
