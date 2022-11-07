@@ -1,0 +1,78 @@
+name: Deploy action
+description: ''
+
+inputs:
+  apiversion: 
+    description: 'api-version'
+    required: false
+    default: ''
+  apigitsha: 
+    description: 'api-gitsha'
+    required: false
+    default: ''
+  workerversion:
+    description: 'worker-version'
+    required: false
+    default: ''
+  workergitsha:
+    description: 'worker-gitsha'
+    required: false
+    default: ''
+  nodeversion:
+    description: 'node-version'
+    required: false
+    default: ''
+  nodegitsha:
+    description: 'node-gitsha'
+    required: false
+    default: ''
+  NAMESPACE:
+    description: 'Namespace'
+    required: true
+    default: ''
+  NAME:
+    description: 'Name'
+    required: true
+    default: ''
+  env:
+    description: 'env'
+    required: true
+    default: ''
+  pushername:
+    description: 'pusher namen'
+    required: true
+    default: ''
+  pusheremail:
+    description: 'pusher email'
+    required: true
+    default: ''
+  deployversion:
+    description: 'deploy version'
+    required: true
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+  - name: run yq eval node
+    if: inputs.node.version != '' && inputs.node.gitsha != ''
+    run: yq eval -i '.node.version = "${{ inputs.node.version }}" | .node.gitsha = "${{ inputs.node.gitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
+    shell: bash
+
+  - name: run yq eval api
+    if: inputs.api.version != '' && inputs.api.gitsha != ''  
+    run: yq eval -i '.api.version = "${{ inputs.api.version }}" | .api.gitsha = "${{ inputs.api.gitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml     
+    shell: bash
+  
+  - name: run yq eval worker
+    if: inputs.worker.version != '' && inputs.worker.gitsha != ''
+    run: yq eval -i '.worker.version = "${{ inputs.worker.version }}" | .worker.gitsha = "${{ inputs.worker.gitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml
+    shell: bash
+  
+  - name: Commit changes
+    run: |
+      git config --global user.name ${{ inputs.pusher.name }}
+      git config --global user.email ${{ inputs.pusher.email }}
+      git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.deploy.versaion }}"
+      git push
+    shell: bash
