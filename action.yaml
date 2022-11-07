@@ -55,24 +55,24 @@ runs:
   using: 'composite'
   steps:
   - name: run yq eval node
-    if: inputs.node.version != '' && inputs.node.gitsha != ''
-    run: yq eval -i '.node.version = "${{ inputs.node.version }}" | .node.gitsha = "${{ inputs.node.gitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
+    if: inputs.nodeversion != '' && inputs.nodegitsha != ''
+    run: yq eval -i '.node.version = "${{ inputs.nodeversion }}" | .node.gitsha = "${{ inputs.nodegitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
     shell: bash
 
   - name: run yq eval api
-    if: inputs.api.version != '' && inputs.api.gitsha != ''  
-    run: yq eval -i '.api.version = "${{ inputs.api.version }}" | .api.gitsha = "${{ inputs.api.gitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml     
+    if: inputs.apiversion != '' && inputs.apigitsha != ''  
+    run: yq eval -i '.api.version = "${{ inputs.apiversion }}" | .api.gitsha = "${{ inputs.apigitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml     
     shell: bash
   
   - name: run yq eval worker
-    if: inputs.worker.version != '' && inputs.worker.gitsha != ''
-    run: yq eval -i '.worker.version = "${{ inputs.worker.version }}" | .worker.gitsha = "${{ inputs.worker.gitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml
+    if: inputs.workerversion != '' && inputs.workergitsha != ''
+    run: yq eval -i '.worker.version = "${{ inputs.workerversion }}" | .worker.gitsha = "${{ inputs.workergitsha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml
     shell: bash
   
   - name: Commit changes
     run: |
-      git config --global user.name ${{ inputs.pusher.name }}
-      git config --global user.email ${{ inputs.pusher.email }}
-      git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.deploy.versaion }}"
+      git config --global user.name ${{ inputs.pushername }}
+      git config --global user.email ${{ inputs.pusheremail }}
+      git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.deployversion }}"
       git push
     shell: bash
