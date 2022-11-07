@@ -17,7 +17,7 @@ inputs:
   env:
     description: 'build.outputs.env'
     required: true
-    default: ''
+    default: 'stage'
 
 runs:
   using: 'composite'
