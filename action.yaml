@@ -23,7 +23,6 @@ runs:
   using: 'composite'
   steps:
   - name: run yq eval node
-    if: inputs.ifcheck == '1'
     run: yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
     shell: bash
 
