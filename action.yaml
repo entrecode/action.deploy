@@ -1,5 +1,5 @@
 name: Deploy action
-description: 'deploy and commit changes'
+description: 'set node version and node sha before committing changes and deploy version'
 
 inputs:
   version: 
