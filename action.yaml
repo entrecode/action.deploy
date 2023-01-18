@@ -2,10 +2,9 @@ name: Deploy action
 description: 'set node version and node sha before committing changes and deploy version'
 
 inputs:
-  version: 
-    description: 'build.outputs.version'
+  PAT:  
+    description: 'PAT from repo'
     required: true
-    default: ''
   NAMESPACE:
     description: 'Namespace'
     required: true
@@ -14,14 +13,14 @@ inputs:
     description: 'Name'
     required: true
     default: ''
+  version: 
+    description: 'build.outputs.version'
+    required: true
+    default: ''
   env:
     description: 'build.outputs.env'
     required: true
     default: 'stage'
-  PAT:  
-    description: 'PAT from repo'
-    required: true
-
 
 runs:
   using: 'composite'

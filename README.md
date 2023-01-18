@@ -1,6 +1,6 @@
 # action.deploy
 
-GitHub composite Action to set node version and node sha before committing changes to GitHub and deploy the version
+GitHub composite action for deploying to argoCD
 
 ## example
 
@@ -14,18 +14,13 @@ deploy:
     needs: build
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: entrecode/action.deploy@latest
         with:
-          repository: entrecode/ec.argocd
-          token: ${{ secrets.PAT }}
-          ref: main
-
-      - uses: entrecode/action.deploy@v1
-        with: 
+          PAT: ${{ secrets.PAT }} 
+          NAMESPACE: ${{ vars.NAMESPACE }}
+          NAME: ${{ vars.NAME }}
           version: ${{ needs.build.outputs.version }}
           env: ${{ needs.build.outputs.env }}
-          NAMESPACE: ${{ env.NAMESPACE }}
-          NAME: ${{ env.NAME }}
 ```
 
 ## inputs
@@ -34,7 +29,10 @@ All inputs are requried to run the action
 
 | Name               | Type     | Description                                                           |
 |--------------------|----------|-----------------------------------------------------------------------|
-| `version`          | String   | Version of the project after the build process (e.g., `1.0.0-dev`)    |
-| `env`              | String   | Environment of the Cluster after the build process (e.g., `stage`)    |
+| `PAT`              | String   | Personal Access Token as GitHub secret                                |
 | `NAMESPACE`        | String   | Namespace of the project                                              |
 | `NAME`             | String   | Name of the project                                                   |
+| `version`          | String   | Version of the project after the build process (e.g., `1.0.0-dev`)    |
+| `env`              | String   | Environment of the Cluster after the build process (e.g., `stage`)    |
+
+`NAMESPACE` and `NAME` have to be defined in GitHub as action-variables. `version` and `env` are build-outputs.
