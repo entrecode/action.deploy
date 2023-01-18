@@ -18,10 +18,21 @@ inputs:
     description: 'build.outputs.env'
     required: true
     default: 'stage'
+  PAT:  
+    description: 'PAT from repo'
+    required: true
+
 
 runs:
   using: 'composite'
   steps:
+
+  - uses: actions/checkout@v3
+    with:
+      repository: entrecode/ec.argocd
+      token: ${{ inputs.PAT }} 
+      ref: main
+
   - name: run yq eval node
     run: yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
     shell: bash
