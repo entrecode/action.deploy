@@ -41,6 +41,7 @@ runs:
       git config --global user.name ${{ github.event.pusher.name }}
       git config --global user.email ${{ github.event.pusher.email }}
       git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.version }}"
+      sleep $((RANDOM % 10))
       git pull --rebase
       git push
     shell: bash
