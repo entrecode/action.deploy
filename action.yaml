@@ -37,8 +37,8 @@ runs:
 
   - name: run yq eval node
     run: |
-      if [[ -z "${{inputs.SERVICES}}"]]; then
-        IFS="," read -a services <<< ${{inputs.SERVICES}}
+      if [[ -z "${env.SERVICES}"]]; then
+        IFS="," read -a services <<< ${env.SERVICES}
         for i in "${services[@]}"; do
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
         done
@@ -47,6 +47,8 @@ runs:
         yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml  
       fi
     shell: bash
+    env:
+      SERVICES: ${{ inputs.SERVICES }}
 
   - name: Commit changes
     run: |
