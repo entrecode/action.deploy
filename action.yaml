@@ -2,7 +2,7 @@ name: Deploy action
 description: 'set node version and node sha before committing changes and deploy version'
 
 inputs:
-  PAT:  
+  PAT:
     description: 'PAT from repo'
     required: true
   NAMESPACE:
@@ -13,7 +13,7 @@ inputs:
     description: 'Name'
     required: true
     default: ''
-  version: 
+  version:
     description: 'build.outputs.version'
     required: true
     default: ''
@@ -25,15 +25,23 @@ inputs:
 runs:
   using: 'composite'
   steps:
-
   - uses: actions/checkout@v3
     with:
       repository: entrecode/ec.argocd
-      token: ${{ inputs.PAT }} 
+      token: ${{ inputs.PAT }}
       ref: main
 
   - name: run yq eval node
-    run: yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME}}/version.yaml  
+    run: |
+      if [[ -z "${{env.SERVICES}}"]]; then
+        IFS="," read -a services <<< ${{env.SERVICES}}
+        for i in "${services[@]}"; do
+          yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
+        done
+      fi
+      if [[ -z "${{env.NAME}}"]]; then
+        yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml  
+      fi
     shell: bash
 
   - name: Commit changes
@@ -41,7 +49,6 @@ runs:
       git config --global user.name ${{ github.event.pusher.name }}
       git config --global user.email ${{ github.event.pusher.email }}
       git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.version }}"
-      sleep $((RANDOM % 10))
       git pull --rebase
       git push
     shell: bash
