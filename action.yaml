@@ -37,7 +37,7 @@ runs:
 
   - name: run yq eval node
     run: |
-      if [[ -z "${env.SERVICES}"]]; then
+      if [[ -z "${env.SERVICES}" ]]; then
         IFS="," read -a services <<< ${env.SERVICES}
         for i in "${services[@]}"; do
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
