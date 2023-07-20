@@ -11,7 +11,11 @@ inputs:
     default: ''
   NAME:
     description: 'Name'
-    required: true
+    required: false
+    default: ''
+  SERVICES:
+    description: 'Services'
+    required: false
     default: ''
   version:
     description: 'build.outputs.version'
@@ -33,8 +37,8 @@ runs:
 
   - name: run yq eval node
     run: |
-      if [[ -z "${{env.SERVICES}}"]]; then
-        IFS="," read -a services <<< ${{env.SERVICES}}
+      if [[ -z "${{inputs.SERVICES}}"]]; then
+        IFS="," read -a services <<< ${{inputs.SERVICES}}
         for i in "${services[@]}"; do
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
         done
