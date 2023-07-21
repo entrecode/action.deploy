@@ -37,18 +37,19 @@ runs:
 
   - name: run yq eval node
     run: |
-      if [[ ! -z "${SERVICES}" ]]; then
-        IFS="," read -a SRV <<< ${env.SERVICES}
+      if [[ ! -z ${SERVICES} ]]; then
+        IFS="," read -a SRV <<< ${SERVICES}
         for i in ${SRV[@]}; do
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
         done
       fi
-      if [[ -z "${{inputs.NAME}}" ]]; then
+      if [[ -z ${inputs.NAME} ]]; then
         yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml  
       fi
     shell: bash
     env:
       SERVICES: ${{ inputs.SERVICES }}
+      NAME: ${{ inputs.NAME }}
 
   - name: Commit changes
     run: |
