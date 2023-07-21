@@ -37,13 +37,13 @@ runs:
 
   - name: run yq eval node
     run: |
-      if [[ ! -z ${SERVICES} ]]; then
+      if [[ -n ${SERVICES} ]]; then
         IFS="," read -a SRV <<< ${SERVICES}
-        for i in ${SRV[@]}; do
+        for i in "${SRV[@]}"; do
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
         done
       fi
-      if [[ ! -z ${NAME} ]]; then
+      if [[ -n ${NAME} ]]; then
         yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml  
       fi
     shell: bash
@@ -57,12 +57,12 @@ runs:
       git config --global user.email ${{ github.event.pusher.email }}
       
       MESSAGE=""
-      if [[ ! -z ${SERVICES} ]]; then
-        for i in ${SRV[@]};
+      if [[ -n ${SERVICES} ]]; then
+        for i in "${SRV[@]}"; do
         MESSAGE="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}] Deploy ${{ inputs.version }}\n$MESSAGE"
         done
       fi
-      if [[ ! -z ${NAME} ]]; then
+      if [[ -n ${NAME} ]]; then
         MESSAGE="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${NAME}] Deploy ${{ inputs.version }}\n$MESSAGE"
       fi
 
