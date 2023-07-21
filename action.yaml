@@ -38,7 +38,7 @@ runs:
   - name: run yq eval node
     run: |
       if [[ -n ${SERVICES} ]]; then
-        IFS="," read -a SRV <<< ${SERVICES}
+        IFS="," read -r -a SRV <<< "${SERVICES}"
         for i in "${SRV[@]}"; do
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
         done
@@ -56,14 +56,16 @@ runs:
       git config --global user.name ${{ github.event.pusher.name }}
       git config --global user.email ${{ github.event.pusher.email }}
       
-      MESSAGE=""
       if [[ -n ${SERVICES} ]]; then
+        IFS="," read -r -a SRV <<< "${SERVICES}"
         for i in "${SRV[@]}"; do
-        MESSAGE="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}] Deploy ${{ inputs.version }}\n$MESSAGE"
+          MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}] Deploy ${{ inputs.version }}"
+          MESSAGE+=$'\n'
         done
       fi
       if [[ -n ${NAME} ]]; then
-        MESSAGE="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${NAME}] Deploy ${{ inputs.version }}\n$MESSAGE"
+        MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${NAME}] Deploy ${{ inputs.version }}"
+        MESSAGE+=$'\n'
       fi
 
       git commit -am "${MESSAGE}"
