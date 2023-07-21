@@ -55,7 +55,21 @@ runs:
     run: |
       git config --global user.name ${{ github.event.pusher.name }}
       git config --global user.email ${{ github.event.pusher.email }}
-      git commit -am "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}] Deploy ${{ inputs.version }}"
+      
+      MESSAGE = ""
+      if [[ ! -z ${SERVICES} ]]; then
+        for i in ${SRV[@]}; d
+        MESSAGE = "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}] Deploy ${{ inputs.version }}\n$MESSAGE"
+        done
+      fi
+      if [[ ! -z ${NAME} ]]; then
+        MESSAGE = "[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${NAME}] Deploy ${{ inputs.version }}\n$MESSAGE"
+      fi
+
+      git commit -am "${MESSAGE}"
       git pull --rebase
       git push
     shell: bash
+    env:
+      SERVICES: ${{ inputs.SERVICES }}
+      NAME: ${{ inputs.NAME }}
