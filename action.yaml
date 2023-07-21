@@ -43,7 +43,7 @@ runs:
           yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
         done
       fi
-      if [[ -z ${NAME} ]]; then
+      if [[ ! -z ${NAME} ]]; then
         yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml  
       fi
     shell: bash
