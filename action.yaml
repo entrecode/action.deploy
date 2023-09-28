@@ -42,7 +42,7 @@ runs:
         for I in "${SRV[@]}"; do
           IFS=":" read -r SERVICE PATH <<< "${I}"
           PATH=${PATH:-.node}
-          yq eval -i '${PATH}.version = "${{ inputs.version }}" | ${PATH}.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
+          yq eval -i '"${PATH}.version" = "${{ inputs.version }}" | "${PATH}.gitsha" = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
         done
       fi
       if [[ -n ${NAME} ]]; then
