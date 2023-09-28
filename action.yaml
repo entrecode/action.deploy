@@ -39,8 +39,10 @@ runs:
     run: |
       if [[ -n ${SERVICES} ]]; then
         IFS="," read -r -a SRV <<< "${SERVICES}"
-        for i in "${SRV[@]}"; do
-          yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}/version.yaml  
+        for I in "${SRV[@]}"; do
+          IFS=":" read -r SERVICE PATH <<< "${I}"
+          PATH=${PATH:-.node}
+          yq eval -i '${PATH}.version = "${{ inputs.version }}" | ${PATH}.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
         done
       fi
       if [[ -n ${NAME} ]]; then
@@ -62,8 +64,9 @@ runs:
       fi
       if [[ -n ${SERVICES} ]]; then
         IFS="," read -r -a SRV <<< "${SERVICES}"
-        for i in "${SRV[@]}"; do
-          MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${i}] Deploy ${{ inputs.version }}"
+        for I in "${SRV[@]}"; do
+          IFS=":" read -r SERVICE PATH <<< "${I}"
+          MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}] Deploy ${{ inputs.version }}"
           MESSAGE+=$'\n'
         done
       fi
