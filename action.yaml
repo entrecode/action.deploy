@@ -67,7 +67,7 @@ runs:
       if [[ -n ${SERVICES} ]]; then
         IFS="," read -r -a SRV <<< "${SERVICES}"
         for I in "${SRV[@]}"; do
-          IFS=":" read -r SERVICE PATH <<< "${I}"
+          IFS=":" read -r SERVICE YQ_PATH <<< "${I}"
           MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}] Deploy ${{ inputs.version }}"
           MESSAGE+=$'\n'
         done
