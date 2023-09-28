@@ -44,7 +44,7 @@ runs:
           YQ_PATH=${YQ_PATH:-.node}
           VERSION=${YQ_PATH}.version
           GITSHA=${YQ_PATH}.gitsha
-          yq eval -i 'eval(VERSION) = "${{ inputs.version }}" | eval(GITSHA) = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
+          yq eval -i 'eval(strenv(VERSION)) = "${{ inputs.version }}" | eval(strenv(GITSHA)) = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
         done
       fi
       if [[ -n ${NAME} ]]; then
