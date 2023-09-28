@@ -40,9 +40,9 @@ runs:
       if [[ -n ${SERVICES} ]]; then
         IFS="," read -r -a SRV <<< "${SERVICES}"
         for I in "${SRV[@]}"; do
-          IFS=":" read -r SERVICE PATH <<< "${I}"
-          PATH=${PATH:-.node}
-          yq eval -i 'eval(PATH).version = "${{ inputs.version }}" | eval(PATH).gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
+          IFS=":" read -r SERVICE YQ_PATH <<< "${I}"
+          YQ_PATH=${YQ_PATH:-.node}
+          yq eval -i 'eval(YQ_PATH).version = "${{ inputs.version }}" | eval(YQ_PATH).gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
         done
       fi
       if [[ -n ${NAME} ]]; then
