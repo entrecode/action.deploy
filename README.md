@@ -21,6 +21,8 @@ deploy:
           NAME: ${{ vars.NAME }}
           version: ${{ needs.build.outputs.version }}
           env: ${{ needs.build.outputs.env }}
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }} 
+          SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
 ```
 
 ## inputs
@@ -35,6 +37,8 @@ All inputs are requried to run the action
 | `SERVICES`         | String   | Comma separated list of services to deploy, can be used to use dynamic yq paths |
 | `version`          | String   | Version of the project after the build process (e.g., `1.0.0-dev`)    |
 | `env`              | String   | Environment of the Cluster after the build process (e.g., `stage`)    |
+| `SLACK_TOKEN`      | String   | SLACK_TOKEN for Deployment Bot App in Slack                           |
+| `SLACK_CHANNEL`    | String   | Name of the SLACK_CHANNEL for the slack-notifications                 |
 
 `NAMESPACE` and `NAME` have to be defined in GitHub as action-variables. `version` and `env` are build-outputs.
 
