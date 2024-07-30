@@ -25,6 +25,14 @@ inputs:
     description: 'build.outputs.env'
     required: true
     default: 'stage'
+  SLACK_TOKEN:
+    description: 'slack token'
+    required: false
+    default: ''
+  SLACK_CHANNEL:
+    description: 'slack channel'
+    required: false
+    default: ''
 
 runs:
   using: 'composite'
@@ -78,3 +86,26 @@ runs:
     env:
       SERVICES: ${{ inputs.SERVICES }}
       NAME: ${{ inputs.NAME }}
+
+
+  - name: Hector slack Notifications
+    if: inputs.NAMESPACE == 'hector' && inputs.env == 'prod' && inputs.SLACK_TOKEN != '' && inputs.SLACK_CHANNEL != ''
+    uses: slackapi/slack-github-action@v1.26.0
+    with:
+      channel-id: ${{ inputs.SLACK_CHANNEL }}
+      payload: |
+        {
+          "attachments": [
+            {
+              "pretext": "",
+              "color": "28a745",
+              "fields": [
+                {
+                  "value": "Neue Version ${{ inputs.version }} von ${{ inputs.NAME }} ausgerollt"
+                }
+              ]
+            }
+          ]
+        }
+    env:
+      SLACK_BOT_TOKEN: ${{ inputs.SLACK_TOKEN }}
