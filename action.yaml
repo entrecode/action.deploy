@@ -63,8 +63,10 @@ runs:
 
   - name: Commit changes
     run: |
-      git config --global user.name ${{ github.event.pusher.name }}
-      git config --global user.email ${{ github.event.pusher.email }}
+      export GITHUB_EVENT_PUSHER_NAME=${{ github.event.pusher.name }}
+      export GITHUB_EVENT_PUSHER_EMAIL=${{ github.event.pusher.email }}
+      git config --global user.name "${GITHUB_EVENT_PUSHER_NAME:-${GITHUB_ACTOR:-github-actions[bot]}}"
+      git config --global user.email "${GITHUB_EVENT_PUSHER_EMAIL:-41898282+github-actions[bot]}@users.noreply.github.com}"
       
       if [[ -n ${NAME} ]]; then
         MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${NAME}] Deploy ${{ inputs.version }}"
