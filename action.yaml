@@ -80,8 +80,13 @@ runs:
           MESSAGE+=$'\n'
         done
       fi
-      
-      git commit -am "${MESSAGE}"
+
+      if ! git diff --quiet; then
+        git commit -am "${MESSAGE}"
+      else
+        echo "No changes – Commit is skipped."
+        exit 0
+      fi
       git pull --rebase
       git push
     shell: bash
