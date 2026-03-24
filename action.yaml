@@ -97,7 +97,7 @@ runs:
 
   - name: Hector slack Notifications with name as input
     if: inputs.NAMESPACE == 'hector' && inputs.env == 'prod' && inputs.SLACK_TOKEN != '' && inputs.SLACK_CHANNEL != '' && inputs.NAME != '' && inputs.SERVICES == ''
-    uses: slackapi/slack-github-action@v2
+    uses: slackapi/slack-github-action@v3
     with:
       method: chat.postMessage
       token: ${{ inputs.SLACK_TOKEN }}
@@ -121,7 +121,7 @@ runs:
 
   - name: Hector slack Notifications with services as input
     if: inputs.NAMESPACE == 'hector' && inputs.env == 'prod' && inputs.SLACK_TOKEN != '' && inputs.SLACK_CHANNEL != '' && inputs.NAME == '' && inputs.SERVICES != ''
-    uses: slackapi/slack-github-action@v2
+    uses: slackapi/slack-github-action@v3
     with:
       method: chat.postMessage
       token: ${{ inputs.SLACK_TOKEN }}
