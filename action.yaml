@@ -50,11 +50,21 @@ runs:
         for I in "${SRV[@]}"; do
           IFS=":" read -r SERVICE YQ_PATH <<< "${I}"
           YQ_PATH=${YQ_PATH:-.node}
-          VERSION=${YQ_PATH}.version GITSHA=${YQ_PATH}.gitsha yq eval -i 'eval(strenv(VERSION)) = "${{ inputs.version }}" | eval(strenv(GITSHA)) = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml  
+          VERSION_FILE="apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}/version.yaml"
+          if [[ ! -f "${VERSION_FILE}" ]]; then
+            echo "::warning::Skipping ${SERVICE}: ${VERSION_FILE} does not exist yet"
+            continue
+          fi
+          VERSION=${YQ_PATH}.version GITSHA=${YQ_PATH}.gitsha yq eval -i 'eval(strenv(VERSION)) = "${{ inputs.version }}" | eval(strenv(GITSHA)) = "${{ github.sha }}"' "${VERSION_FILE}"
         done
       fi
       if [[ -n ${NAME} ]]; then
-        yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml  
+        VERSION_FILE="apps/${{ inputs.env }}/${{ inputs.NAMESPACE }}/${{ inputs.NAME }}/version.yaml"
+        if [[ ! -f "${VERSION_FILE}" ]]; then
+          echo "::warning::Skipping ${{ inputs.NAME }}: ${VERSION_FILE} does not exist yet"
+        else
+          yq eval -i '.node.version = "${{ inputs.version }}" | .node.gitsha = "${{ github.sha }}"' "${VERSION_FILE}"
+        fi
       fi
     shell: bash
     env:
