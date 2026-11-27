@@ -112,10 +112,8 @@ runs:
         git config --global user.name "${APP_SLUG}[bot]"
         git config --global user.email "${APP_USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
       else
-        export GITHUB_EVENT_PUSHER_NAME=${{ github.event.pusher.name }}
-        export GITHUB_EVENT_PUSHER_EMAIL=${{ github.event.pusher.email }}
-        git config --global user.name "${GITHUB_EVENT_PUSHER_NAME:-${GITHUB_ACTOR:-github-actions[bot]}}"
-        git config --global user.email "${GITHUB_EVENT_PUSHER_EMAIL:-41898282+github-actions[bot]}@users.noreply.github.com}"
+        git config --global user.name "${PUSHER_NAME:-${GITHUB_ACTOR}}"
+        git config --global user.email "${PUSHER_EMAIL:-${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com}"
       fi
 
       if [[ -n ${NAME} ]]; then
@@ -131,7 +129,8 @@ runs:
         done
       fi
       if [[ -n ${APP_SLUG} ]]; then
-        MESSAGE+=$'\n'"Triggered-by: ${GITHUB_ACTOR} (${GITHUB_REPOSITORY}@${GITHUB_SHA})"
+        MESSAGE+=$'\n'"Source: ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+        MESSAGE+=$'\n'"Co-authored-by: ${GITHUB_ACTOR} <${GITHUB_ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com>"
       fi
 
       if ! git diff --quiet; then
@@ -148,6 +147,8 @@ runs:
       NAME: ${{ inputs.NAME }}
       APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
       APP_USER_ID: ${{ steps.app-user.outputs.id }}
+      PUSHER_NAME: ${{ github.event.pusher.name }}
+      PUSHER_EMAIL: ${{ github.event.pusher.email }}
 
 
   - name: Hector slack Notifications with name as input

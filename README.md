@@ -45,7 +45,7 @@ Credentials: either `APP_ID` + `APP_PRIVATE_KEY` (preferred) or `PAT` (legacy fa
 
 `NAMESPACE` and `NAME` have to be defined in GitHub as action-variables. `version` and `env` are build-outputs.
 
-With the App inputs the action creates a short-lived installation token for `entrecode/ec.argocd` only. The deploy commit in ec.argocd is authored by `entrecode-deploy-bot[bot]`; the commit message gets a `Triggered-by:` line with the actor and source commit.
+With the App inputs the action creates a short-lived installation token for `entrecode/ec.argocd` only. The deploy commit in ec.argocd is authored by `entrecode-deploy-bot[bot]`; the commit message gets a `Source: <repo>@<sha>` line (linked by GitHub) and a `Co-authored-by:` trailer, so the actor shows up with avatar next to the bot in the commit list.
 
 ## dynamic yq paths
 
