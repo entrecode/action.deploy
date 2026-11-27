@@ -16,7 +16,8 @@ deploy:
     steps:
       - uses: entrecode/action.deploy@latest
         with:
-          PAT: ${{ secrets.PAT }} 
+          APP_ID: ${{ vars.GITOPS_APP_ID }}
+          APP_PRIVATE_KEY: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
           NAMESPACE: ${{ vars.NAMESPACE }}
           NAME: ${{ vars.NAME }}
           version: ${{ needs.build.outputs.version }}
@@ -27,11 +28,13 @@ deploy:
 
 ## inputs
 
-All inputs are requried to run the action
+Credentials: either `APP_ID` + `APP_PRIVATE_KEY` (preferred) or `PAT` (legacy fallback) must be set.
 
 | Name               | Type     | Description                                                           |
 |--------------------|----------|-----------------------------------------------------------------------|
-| `PAT`              | String   | Personal Access Token as GitHub secret                                |
+| `APP_ID`           | String   | ID of the GitHub App `entrecode-deploy-bot` (org variable `GITOPS_APP_ID`) |
+| `APP_PRIVATE_KEY`  | String   | Private key of that App (org secret `GITOPS_APP_PRIVATE_KEY`)         |
+| `PAT`              | String   | Legacy: Personal Access Token, only used if the App inputs are empty  |
 | `NAMESPACE`        | String   | Namespace of the project                                              |
 | `NAME`             | String   | Name of the project                                                   |
 | `SERVICES`         | String   | Comma separated list of services to deploy, can be used to use dynamic yq paths |
@@ -41,6 +44,8 @@ All inputs are requried to run the action
 | `SLACK_CHANNEL`    | String   | Name of the SLACK_CHANNEL for the slack-notifications                 |
 
 `NAMESPACE` and `NAME` have to be defined in GitHub as action-variables. `version` and `env` are build-outputs.
+
+With the App inputs the action creates a short-lived installation token for `entrecode/ec.argocd` only. The deploy commit in ec.argocd is authored by `entrecode-deploy-bot[bot]`; the commit message gets a `Triggered-by:` line with the actor and source commit.
 
 ## dynamic yq paths
 

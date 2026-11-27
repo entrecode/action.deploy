@@ -3,8 +3,17 @@ description: 'set node version and node sha before committing changes and deploy
 
 inputs:
   PAT:
-    description: 'PAT from repo'
-    required: true
+    description: 'PAT from repo (fallback if APP_ID/APP_PRIVATE_KEY are not set)'
+    required: false
+    default: ''
+  APP_ID:
+    description: 'GitHub App ID with Contents write on entrecode/ec.argocd (e.g. vars.GITOPS_APP_ID)'
+    required: false
+    default: ''
+  APP_PRIVATE_KEY:
+    description: 'Private key of that GitHub App (e.g. secrets.GITOPS_APP_PRIVATE_KEY)'
+    required: false
+    default: ''
   NAMESPACE:
     description: 'Namespace'
     required: true
@@ -37,10 +46,36 @@ inputs:
 runs:
   using: 'composite'
   steps:
+  - name: Check credentials
+    if: (inputs.APP_ID == '' || inputs.APP_PRIVATE_KEY == '') && inputs.PAT == ''
+    run: |
+      echo "::error::Either APP_ID and APP_PRIVATE_KEY or PAT must be set"
+      exit 1
+    shell: bash
+
+  - name: Create GitHub App token
+    id: app-token
+    if: inputs.APP_ID != '' && inputs.APP_PRIVATE_KEY != ''
+    uses: actions/create-github-app-token@v2
+    with:
+      app-id: ${{ inputs.APP_ID }}
+      private-key: ${{ inputs.APP_PRIVATE_KEY }}
+      owner: entrecode
+      repositories: ec.argocd
+
+  - name: Get GitHub App bot user
+    id: app-user
+    if: steps.app-token.outputs.token != ''
+    run: echo "id=$(gh api "/users/${APP_SLUG}%5Bbot%5D" --jq .id)" >> "$GITHUB_OUTPUT"
+    shell: bash
+    env:
+      GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+
   - uses: actions/checkout@v6
     with:
       repository: entrecode/ec.argocd
-      token: ${{ inputs.PAT }}
+      token: ${{ steps.app-token.outputs.token || inputs.PAT }}
       ref: main
 
   - name: run yq eval node
@@ -73,11 +108,16 @@ runs:
 
   - name: Commit changes
     run: |
-      export GITHUB_EVENT_PUSHER_NAME=${{ github.event.pusher.name }}
-      export GITHUB_EVENT_PUSHER_EMAIL=${{ github.event.pusher.email }}
-      git config --global user.name "${GITHUB_EVENT_PUSHER_NAME:-${GITHUB_ACTOR:-github-actions[bot]}}"
-      git config --global user.email "${GITHUB_EVENT_PUSHER_EMAIL:-41898282+github-actions[bot]}@users.noreply.github.com}"
-      
+      if [[ -n ${APP_SLUG} ]]; then
+        git config --global user.name "${APP_SLUG}[bot]"
+        git config --global user.email "${APP_USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
+      else
+        export GITHUB_EVENT_PUSHER_NAME=${{ github.event.pusher.name }}
+        export GITHUB_EVENT_PUSHER_EMAIL=${{ github.event.pusher.email }}
+        git config --global user.name "${GITHUB_EVENT_PUSHER_NAME:-${GITHUB_ACTOR:-github-actions[bot]}}"
+        git config --global user.email "${GITHUB_EVENT_PUSHER_EMAIL:-41898282+github-actions[bot]}@users.noreply.github.com}"
+      fi
+
       if [[ -n ${NAME} ]]; then
         MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${NAME}] Deploy ${{ inputs.version }}"
         MESSAGE+=$'\n'
@@ -89,6 +129,9 @@ runs:
           MESSAGE+="[${{ inputs.env }}/${{ inputs.NAMESPACE }}/${SERVICE}] Deploy ${{ inputs.version }}"
           MESSAGE+=$'\n'
         done
+      fi
+      if [[ -n ${APP_SLUG} ]]; then
+        MESSAGE+=$'\n'"Triggered-by: ${GITHUB_ACTOR} (${GITHUB_REPOSITORY}@${GITHUB_SHA})"
       fi
 
       if ! git diff --quiet; then
@@ -103,6 +146,8 @@ runs:
     env:
       SERVICES: ${{ inputs.SERVICES }}
       NAME: ${{ inputs.NAME }}
+      APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+      APP_USER_ID: ${{ steps.app-user.outputs.id }}
 
 
   - name: Hector slack Notifications with name as input
